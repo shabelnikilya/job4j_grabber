@@ -16,7 +16,7 @@ public class AlertRabbit {
 
     private static final Logger LOG = LoggerFactory.getLogger(AlertRabbit.class.getName());
 
-    public static String getProperties(String key) {
+    public static Properties getProperties() {
         Properties config = new Properties();
         try (InputStream in = AlertRabbit
                 .class.getClassLoader()
@@ -25,28 +25,19 @@ public class AlertRabbit {
         } catch (IOException io) {
             LOG.error("I/O exception", io);
         }
-        return config.getProperty(key);
+        return config;
     }
 
-    public static int ifValidGetTime(String key) {
-        int value = -1;
-        try {
-            value = Integer.parseInt(getProperties(key));
-        } catch (NumberFormatException nfe) {
-            LOG.error("Check the values in rabbit.properties, by key - rabbit.interval");
-        }
-        return value;
-    }
-
-    public static Connection initConnection() throws ClassNotFoundException, SQLException {
-        Class.forName(getProperties("jdbc.driver"));
-        return DriverManager.getConnection(getProperties("jdbc.url"),
-                getProperties("jdbc.username"),
-                getProperties("jdbc.password"));
+    public static Connection initConnection(Properties properties) throws ClassNotFoundException, SQLException {
+        Class.forName(properties.getProperty("jdbc.driver"));
+        return DriverManager.getConnection(properties.getProperty("jdbc.url"),
+                properties.getProperty("jdbc.username"),
+                properties.getProperty("jdbc.password"));
     }
 
     public static void main(String[] args) {
-        try (Connection connection = initConnection()) {
+        Properties properties = getProperties();
+        try (Connection connection = initConnection(properties)) {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDataMap data = new JobDataMap();
@@ -55,14 +46,14 @@ public class AlertRabbit {
                     .usingJobData(data)
                     .build();
             SimpleScheduleBuilder times = simpleSchedule()
-                    .withIntervalInSeconds(ifValidGetTime("rabbit.interval"))
+                    .withIntervalInSeconds(Integer.parseInt(properties.getProperty("rabbit.interval")))
                     .repeatForever();
             Trigger trigger = newTrigger()
                     .startNow()
                     .withSchedule(times)
                     .build();
             scheduler.scheduleJob(job, trigger);
-            Thread.sleep(ifValidGetTime("main.time"));
+            Thread.sleep(Integer.parseInt(properties.getProperty("main.time")));
             scheduler.shutdown();
         } catch (SchedulerException | InterruptedException
                 | SQLException | ClassNotFoundException e) {
