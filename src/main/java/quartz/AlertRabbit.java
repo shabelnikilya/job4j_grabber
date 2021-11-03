@@ -4,7 +4,6 @@ import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -17,26 +16,18 @@ public class AlertRabbit {
 
     private static final Logger LOG = LoggerFactory.getLogger(AlertRabbit.class.getName());
 
-    public static String getProperties(String key) {
+    public static int getProperties(String key) {
+        int time = -1;
         Properties config = new Properties();
         try (InputStream in = AlertRabbit
-                                .class.getClassLoader()
-                                .getResourceAsStream("rabbit.properties")) {
+                .class.getClassLoader()
+                .getResourceAsStream("rabbit.properties")) {
             config.load(in);
-        } catch (IOException io) {
-            LOG.error("I/O exception", io);
+            time = Integer.parseInt(config.getProperty(key));
+        } catch (IOException | NumberFormatException e) {
+            LOG.error("I/O or NumberFormatException(Check the values in rabbit.properties) exception", e);
         }
-        return config.getProperty(key);
-    }
-
-    public static int ifValidGetTime(String key) {
-        int value = 0;
-        try {
-            value = Integer.parseInt(getProperties(key));
-        } catch (NumberFormatException nfe) {
-            LOG.error("Check the values in rabbit.properties, by key - rabbit.interval");
-        }
-        return value;
+        return time;
     }
 
     public static void main(String[] args) {
@@ -45,7 +36,7 @@ public class AlertRabbit {
             scheduler.start();
             JobDetail job = newJob(Rabbit.class).build();
             SimpleScheduleBuilder times = simpleSchedule()
-                    .withIntervalInSeconds(ifValidGetTime("rabbit.interval"))
+                    .withIntervalInSeconds(getProperties("rabbit.interval"))
                     .repeatForever();
             Trigger trigger = newTrigger()
                     .startNow()
