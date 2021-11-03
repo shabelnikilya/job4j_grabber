@@ -18,7 +18,7 @@ public class SqlRuDateTimeParser implements DateTimeParser {
     }
 
     public static int getMonth(String month) {
-        int rsl = -1;
+        int rsl;
             switch (month) {
             case ("янв"):
                 rsl = 1;
@@ -56,6 +56,7 @@ public class SqlRuDateTimeParser implements DateTimeParser {
             case ("дек"):
                 rsl = 12;
                 break;
+                default: throw new IllegalArgumentException("Incorrect month");
         }
         return rsl;
     }
@@ -66,7 +67,6 @@ public class SqlRuDateTimeParser implements DateTimeParser {
     }
 
     public static LocalDate getDateWhenFullDate(String days, String month, String year) {
-        validMonth(month);
         int readFromSiteYear = stringToInt(year);
         int absYear = readFromSiteYear > LocalDate.now().getYear() - 2000
                 ? readFromSiteYear + 1900 : readFromSiteYear + 2000;
@@ -89,11 +89,6 @@ public class SqlRuDateTimeParser implements DateTimeParser {
     public static void validOneWordDate(String date) {
         if (!date.contains("сегодня") && !date.contains("вчера")) {
             throw new IllegalArgumentException("Wrong date");
-        }
-    }
-    public static void validMonth(String month) {
-        if (getMonth(month) == -1) {
-            throw new IllegalArgumentException("Incorrect month");
         }
     }
 }
