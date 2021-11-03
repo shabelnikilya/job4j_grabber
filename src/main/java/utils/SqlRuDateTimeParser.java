@@ -17,23 +17,47 @@ public class SqlRuDateTimeParser implements DateTimeParser {
         return LocalDateTime.of(date, time);
     }
 
-
-    public static int getMonth(String in) {
-        return switch (in) {
-            case ("янв") -> 1;
-            case ("фев") -> 2;
-            case ("мар") -> 3;
-            case ("апр") -> 4;
-            case ("май") -> 5;
-            case ("июн") -> 6;
-            case ("июл") -> 7;
-            case ("авг") -> 8;
-            case ("сен") -> 9;
-            case ("окт") -> 10;
-            case ("ноя") -> 11;
-            case ("дек") -> 12;
-            default -> throw new IllegalArgumentException("Wrong month");
-        };
+    public static int getMonth(String month) {
+        int rsl = -1;
+            switch (month) {
+            case ("янв"):
+                rsl = 1;
+                break;
+            case ("фев"):
+                rsl = 2;
+                break;
+            case ("мар"):
+                rsl = 3;
+                break;
+            case ("апр"):
+                rsl = 4;
+                break;
+            case ("май"):
+                rsl = 5;
+                break;
+            case ("июн"):
+                rsl = 6;
+                break;
+            case ("июл"):
+                rsl = 7;
+                break;
+            case ("авг"):
+                rsl = 8;
+                break;
+            case ("сен"):
+                rsl = 9;
+                break;
+            case ("окт"):
+                rsl = 10;
+                break;
+            case ("ноя"):
+                rsl = 11;
+                break;
+            case ("дек"):
+                rsl = 12;
+                break;
+        }
+        return rsl;
     }
 
     public static LocalDate getDateWhenOneWordDay(String in) {
@@ -42,6 +66,7 @@ public class SqlRuDateTimeParser implements DateTimeParser {
     }
 
     public static LocalDate getDateWhenFullDate(String days, String month, String year) {
+        validMonth(month);
         int readFromSiteYear = stringToInt(year);
         int absYear = readFromSiteYear > LocalDate.now().getYear() - 2000
                 ? readFromSiteYear + 1900 : readFromSiteYear + 2000;
@@ -64,6 +89,11 @@ public class SqlRuDateTimeParser implements DateTimeParser {
     public static void validOneWordDate(String date) {
         if (!date.contains("сегодня") && !date.contains("вчера")) {
             throw new IllegalArgumentException("Wrong date");
+        }
+    }
+    public static void validMonth(String month) {
+        if (getMonth(month) == -1) {
+            throw new IllegalArgumentException("Incorrect month");
         }
     }
 }
