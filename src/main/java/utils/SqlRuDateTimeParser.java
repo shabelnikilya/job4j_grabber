@@ -61,9 +61,9 @@ public class SqlRuDateTimeParser implements DateTimeParser {
         return rsl;
     }
 
-    public static LocalDate getDateWhenOneWordDay(String in) {
-        validOneWordDate(in);
-        return in.equals("сегодня") ? LocalDate.now() : LocalDate.now().minusDays(1);
+    public static LocalDate getDateWhenOneWordDay(String days) {
+        validOneWordDate(days);
+        return days.equals("сегодня") ? LocalDate.now() : LocalDate.now().minusDays(1);
     }
 
     public static LocalDate getDateWhenFullDate(String days, String month, String year) {
