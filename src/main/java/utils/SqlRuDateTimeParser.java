@@ -1,8 +1,24 @@
 package utils;
 
 import java.time.*;
+import java.util.Map;
 
 public class SqlRuDateTimeParser implements DateTimeParser {
+
+    private static final Map<String, Integer> MONTHS = Map.ofEntries(
+                            Map.entry("янв", 1),
+                            Map.entry("фев", 2),
+                            Map.entry("мар", 3),
+                            Map.entry("апр", 4),
+                            Map.entry("май", 5),
+                            Map.entry("июн", 6),
+                            Map.entry("июл", 7),
+                            Map.entry("авг", 8),
+                            Map.entry("сен", 9),
+                            Map.entry("окт", 10),
+                            Map.entry("ноя", 11),
+                            Map.entry("дек", 12)
+    );
 
     @Override
     public LocalDateTime parse(String parse) {
@@ -18,47 +34,7 @@ public class SqlRuDateTimeParser implements DateTimeParser {
     }
 
     public static int getMonth(String month) {
-        int rsl;
-            switch (month) {
-            case ("янв"):
-                rsl = 1;
-                break;
-            case ("фев"):
-                rsl = 2;
-                break;
-            case ("мар"):
-                rsl = 3;
-                break;
-            case ("апр"):
-                rsl = 4;
-                break;
-            case ("май"):
-                rsl = 5;
-                break;
-            case ("июн"):
-                rsl = 6;
-                break;
-            case ("июл"):
-                rsl = 7;
-                break;
-            case ("авг"):
-                rsl = 8;
-                break;
-            case ("сен"):
-                rsl = 9;
-                break;
-            case ("окт"):
-                rsl = 10;
-                break;
-            case ("ноя"):
-                rsl = 11;
-                break;
-            case ("дек"):
-                rsl = 12;
-                break;
-                default: throw new IllegalArgumentException("Incorrect month");
-        }
-        return rsl;
+        return MONTHS.get(month);
     }
 
     public static LocalDate getDateWhenOneWordDay(String days) {
