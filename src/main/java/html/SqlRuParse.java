@@ -24,6 +24,28 @@ public class SqlRuParse implements Parse {
         this.dateTimeParser = dateTimeParser;
     }
 
+    @Override
+    public List<Post> list(String link) {
+        List<Post> rsl = new ArrayList<>();
+        Document doc = getDocuments(link);
+        Elements row = Objects.requireNonNull(doc).select(".postslisttopic");
+        row.forEach(x -> rsl.add(getPost(x.child(0))));
+        return rsl;
+    }
+
+    @Override
+    public Post detail(String link) {
+        Document doc = getDocuments(link);
+        Elements elPost = Objects.requireNonNull(doc).select(".messageHeader");
+        DateTimeParser dateToObject = new SqlRuDateTimeParser();
+        String namePost = Objects.requireNonNull(elPost.stream().findFirst().orElse(null)).text();
+        return new Post(namePost.substring(0, namePost.length() - 6),
+                link,
+                getDescription(doc),
+                dateToObject.parse(getDateWithSite(doc)
+                ));
+    }
+
     public static Post getPost(Element el) {
         String link = el.attr("href");
         Document doc = null;
@@ -36,6 +58,16 @@ public class SqlRuParse implements Parse {
         return new Post(el.text(), link,
                         getDescription(Objects.requireNonNull(doc)),
                         dateToObject.parse(getDateWithSite(doc)));
+    }
+
+    public static Document getDocuments(String link) {
+        Document doc = null;
+        try {
+            doc = Jsoup.connect(link).get();
+        } catch (IOException io) {
+            LOG.error("I/O exception in method - detail", io);
+        }
+        return doc;
     }
 
     public static String getDescription(Document link) {
@@ -54,38 +86,6 @@ public class SqlRuParse implements Parse {
         StringBuilder str = new StringBuilder(date);
         int index = str.indexOf(":");
         return str.substring(0, index + 3);
-    }
-
-    @Override
-    public List<Post> list(String link) {
-        List<Post> rsl = new ArrayList<>();
-        Document doc = null;
-        try {
-            doc = Jsoup.connect(link).get();
-        } catch (IOException io) {
-            LOG.error("I/O exception in method - list", io);
-        }
-        Elements row = Objects.requireNonNull(doc).select(".postslisttopic");
-        row.forEach(x -> rsl.add(getPost(x.child(0))));
-        return rsl;
-    }
-
-    @Override
-    public Post detail(String link) {
-        Document doc = null;
-        try {
-            doc = Jsoup.connect(link).get();
-        } catch (IOException io) {
-            LOG.error("I/O exception in method - detail", io);
-        }
-        Elements e = Objects.requireNonNull(doc).select(".messageHeader");
-        DateTimeParser dateToObject = new SqlRuDateTimeParser();
-        String namePost = Objects.requireNonNull(e.stream().findFirst().orElse(null)).text();
-        return new Post(namePost.substring(0, namePost.length() - 6),
-                        link,
-                        getDescription(doc),
-                        dateToObject.parse(getDateWithSite(doc)
-                        ));
     }
 }
 
