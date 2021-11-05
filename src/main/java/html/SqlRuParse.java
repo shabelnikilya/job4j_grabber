@@ -1,9 +1,13 @@
 package html;
 
+import grabber.Post;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import utils.DateTimeParser;
+import utils.SqlRuDateTimeParser;
+import java.io.IOException;
 import java.util.Objects;
 
 public class SqlRuParse {
@@ -12,16 +16,19 @@ public class SqlRuParse {
             Document doc = Jsoup.connect("https://www.sql.ru/forum/job-offers/" + i).get();
             Elements row = doc.select(".postslisttopic");
             for (Element td : row) {
-                Element par = td.parent();
                 Element href = td.child(0);
-                Document docPost = Jsoup.connect(href.attr("href")).get();
-                System.out.println("Название вакансии - " + href.text());
-                System.out.println("Ссылка на вакансию - " + href.attr("href"));
-                System.out.println("Дата опубликования вакансии - " + par.children().get(5).text());
-                System.out.println(getDescription(docPost));
-                System.out.println(getDateCreatedPost(docPost));
+                System.out.println(getPost(href));
             }
         }
+    }
+
+    public static Post getPost(Element el) throws IOException {
+        String link = el.attr("href");
+        Document doc = Jsoup.connect(link).get();
+        DateTimeParser dateToObject = new SqlRuDateTimeParser();
+        return new Post(el.text(), link,
+                        getDescription(doc),
+                        dateToObject.parse(getDateWithSite(doc)));
     }
 
     public static String getDescription(Document link) {
@@ -30,7 +37,7 @@ public class SqlRuParse {
         return Objects.requireNonNull(parent).text();
     }
 
-    public static String getDateCreatedPost(Document link) {
+    public static String getDateWithSite(Document link) {
         Elements w = link.select(".msgFooter");
         Element p = w.stream().findFirst().orElse(null);
         return splitString(Objects.requireNonNull(p).text());
