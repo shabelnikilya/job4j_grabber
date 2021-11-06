@@ -9,7 +9,6 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.DateTimeParser;
-import utils.SqlRuDateTimeParser;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +28,7 @@ public class SqlRuParse implements Parse {
         List<Post> rsl = new ArrayList<>();
         Document doc = getDocuments(link);
         Elements row = Objects.requireNonNull(doc).select(".postslisttopic");
-        row.forEach(x -> rsl.add(getPost(x.child(0))));
+        row.forEach(x -> rsl.add(detail(x.child(0).attr("href"))));
         return rsl;
     }
 
@@ -37,27 +36,12 @@ public class SqlRuParse implements Parse {
     public Post detail(String link) {
         Document doc = getDocuments(link);
         Elements elPost = Objects.requireNonNull(doc).select(".messageHeader");
-        DateTimeParser dateToObject = new SqlRuDateTimeParser();
         String namePost = Objects.requireNonNull(elPost.stream().findFirst().orElse(null)).text();
         return new Post(namePost.substring(0, namePost.length() - 6),
                 link,
                 getDescription(doc),
-                dateToObject.parse(getDateWithSite(doc)
+                dateTimeParser.parse(getDateWithSite(doc)
                 ));
-    }
-
-    public static Post getPost(Element el) {
-        String link = el.attr("href");
-        Document doc = null;
-        try {
-            doc = Jsoup.connect(link).get();
-        } catch (IOException io) {
-            LOG.error("I/O exception in method - getPost", io);
-        }
-        DateTimeParser dateToObject = new SqlRuDateTimeParser();
-        return new Post(el.text(), link,
-                        getDescription(Objects.requireNonNull(doc)),
-                        dateToObject.parse(getDateWithSite(doc)));
     }
 
     public static Document getDocuments(String link) {
