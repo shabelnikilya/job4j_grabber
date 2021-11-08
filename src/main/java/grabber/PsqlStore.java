@@ -3,9 +3,10 @@ package grabber;
 import html.SqlRuParse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import utils.DateTimeParser;
+import utils.SqlRuDateTimeParser;
 import java.io.InputStream;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -33,18 +34,11 @@ public class PsqlStore implements Store, AutoCloseable {
                 .getResourceAsStream("app.properties")) {
             Properties cc = new Properties();
             cc.load(in);
+            DateTimeParser dateTimeParser = new SqlRuDateTimeParser();
+            Parse parse = new SqlRuParse(dateTimeParser);
             Store sqlStore = new PsqlStore(cc);
-            Post pOne = new Post("Разработчик Flutter 100-200к ,удаленно",
-                    "https://www.sql.ru/forum/1339936/razrabotchik-flutter-100-200k-udalenno",
-                    "Разработчик Flutter 100-200к ,удаленно" + System.lineSeparator()
-                            + "ADP GROUP – компания, создающая комплексные it‐решения для"
-                            + "бизнеса, его масштабирования и внедрения новых бизнес процессов",
-                    LocalDateTime.of(2021, 11, 6, 12, 1));
-            Post pSecond = new Post(" Ведущий программист Delphi",
-                    "https://www.sql.ru/forum/1339565/vedushhiy-programmist-delphi",
-                    "ГК «Форум-Авто» уже более 25 лет на российском "
-                            + "рынке оптовых продаж запчастей иностранного и отечественного производства.",
-                    LocalDateTime.of(2021, 10, 19, 13, 13));
+            Post pOne = parse.detail("https://www.sql.ru/forum/1339936/razrabotchik-flutter-100-200k-udalenno");
+            Post pSecond = parse.detail("https://www.sql.ru/forum/1339873/swift-middle-developer");
             sqlStore.save(pOne);
             sqlStore.save(pSecond);
             List<Post> rsl = sqlStore.getAll();
@@ -117,6 +111,7 @@ public class PsqlStore implements Store, AutoCloseable {
 
     public static Post createdPost(ResultSet in) throws  SQLException {
         return new Post(
+                in.getInt("id"),
                 in.getString("name"),
                 in.getString("link"),
                 in.getString("text"),
