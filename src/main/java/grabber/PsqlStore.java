@@ -36,10 +36,9 @@ public class PsqlStore implements Store, AutoCloseable {
             Store sqlStore = new PsqlStore(cc);
             Post pOne = new Post("Разработчик Flutter 100-200к ,удаленно",
                     "https://www.sql.ru/forum/1339936/razrabotchik-flutter-100-200k-udalenno",
-                    """
-                            Разработчик Flutter 100-200к ,удаленно
-                            ADP GROUP – компания, создающая комплексные it‐решения для
-                            бизнеса, его масштабирования и внедрения новых бизнес процессов""",
+                    "Разработчик Flutter 100-200к ,удаленно" + System.lineSeparator()
+                            + "ADP GROUP – компания, создающая комплексные it‐решения для"
+                            + "бизнеса, его масштабирования и внедрения новых бизнес процессов",
                     LocalDateTime.of(2021, 11, 6, 12, 1));
             Post pSecond = new Post(" Ведущий программист Delphi",
                     "https://www.sql.ru/forum/1339565/vedushhiy-programmist-delphi",
