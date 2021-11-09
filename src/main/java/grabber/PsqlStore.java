@@ -111,6 +111,7 @@ public class PsqlStore implements Store, AutoCloseable {
 
     public static Post createdPost(ResultSet in) throws  SQLException {
         return new Post(
+                in.getInt("id"),
                 in.getString("name"),
                 in.getString("link"),
                 in.getString("text"),

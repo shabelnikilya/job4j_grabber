@@ -26,9 +26,11 @@ public class SqlRuParse implements Parse {
     @Override
     public List<Post> list(String link) {
         List<Post> rsl = new ArrayList<>();
-        Document doc = getDocuments(link);
-        Elements row = Objects.requireNonNull(doc).select(".postslisttopic");
-        row.forEach(x -> rsl.add(detail(x.child(0).attr("href"))));
+        for (int i = 1; i < 6; i++) {
+            Document doc = getDocuments(link + "/" + i);
+            Elements row = Objects.requireNonNull(doc).select(".postslisttopic");
+            row.forEach(x -> rsl.add(detail(x.child(0).attr("href"))));
+        }
         return rsl;
     }
 

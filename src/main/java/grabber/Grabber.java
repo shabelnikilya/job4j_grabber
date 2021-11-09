@@ -8,7 +8,6 @@ import utils.SqlRuDateTimeParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
@@ -27,7 +26,7 @@ public class Grabber implements Grab {
         return scheduler;
     }
 
-    public void cfg() throws IOException {
+    public void loadCfg() throws IOException {
         try (InputStream in = Grabber
                 .class.getClassLoader()
                 .getResourceAsStream("app.properties")) {
@@ -64,7 +63,7 @@ public class Grabber implements Grab {
                 List<Post> postStoreSql = store.getAll();
                 parseSqlRu.stream()
                         .filter(x -> x.getTitle().toLowerCase().contains("java")
-                                && !x.getTitle().toLowerCase().contains("script"))
+                                && !x.getTitle().toLowerCase().contains("javascript"))
                         .filter(x -> {
                             boolean rsl = true;
                             for (Post p : postStoreSql) {
@@ -80,7 +79,7 @@ public class Grabber implements Grab {
 
         public static void main(String[] args) throws IOException, SchedulerException {
             Grabber grab = new Grabber();
-            grab.cfg();
+            grab.loadCfg();
             Scheduler scheduler = grab.scheduler();
             Store store = grab.store();
             DateTimeParser dateTimeParser = new SqlRuDateTimeParser();
