@@ -6,7 +6,7 @@
 
   <groupId>ru.job4j</groupId>
   <artifactId>job4j_grabber</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
 
   <name>job4j_grabber</name>
 
@@ -62,7 +62,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>2.17</version>
+        <version>3.1.2</version>
         <executions>
           <execution>
             <id>validate</id>
@@ -113,7 +113,7 @@
               <finalName>Grabber</finalName>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>quartz.AlertRabbit</mainClass>
+                  <mainClass>grabber.Grabber</mainClass>
                 </transformer>
               </transformers>
             </configuration>

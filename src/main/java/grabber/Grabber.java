@@ -18,10 +18,10 @@ import static org.quartz.TriggerBuilder.newTrigger;
 
 public class Grabber implements Grab {
 
-    private final Properties cfg = new Properties();
+    private static final Properties CFG = new Properties();
 
     public Store store() {
-        return new PsqlStore(cfg);
+        return new PsqlStore(CFG);
     }
 
     public Scheduler scheduler() throws SchedulerException {
@@ -34,7 +34,7 @@ public class Grabber implements Grab {
         try (InputStream in = Grabber
                 .class.getClassLoader()
                 .getResourceAsStream("app.properties")) {
-            cfg.load(in);
+            CFG.load(in);
         }
     }
 
@@ -47,7 +47,7 @@ public class Grabber implements Grab {
                 .usingJobData(data)
                 .build();
         SimpleScheduleBuilder times = simpleSchedule()
-                .withIntervalInSeconds(Integer.parseInt((cfg.getProperty("time"))))
+                .withIntervalInSeconds(Integer.parseInt((CFG.getProperty("time"))))
                 .repeatForever();
         Trigger trigger = newTrigger()
                 .startNow()
@@ -63,23 +63,24 @@ public class Grabber implements Grab {
             JobDataMap map = context.getJobDetail().getJobDataMap();
             Store store = (Store) map.get("store");
             Parse parse = (Parse) map.get("parse");
-                List<Post> parseSqlRu = parse.list("https://www.sql.ru/forum/job-offers");
-                List<Post> postStoreSql = store.getAll();
-                parseSqlRu.stream()
-                        .filter(x -> x.getTitle().toLowerCase().contains("java")
-                                && !x.getTitle().toLowerCase().contains("javascript"))
-                        .filter(x -> {
-                            boolean rsl = true;
-                            for (Post p : postStoreSql) {
-                                if (p.getLink().equals(x.getLink())) {
-                                    rsl = false;
-                                    break;
-                                }
+            List<Post> parseSqlRu = parse.list(CFG.getProperty("parse.site"));
+            List<Post> postStoreSql = store.getAll();
+            parseSqlRu.stream()
+                    .filter(x -> x.getTitle().toLowerCase().contains("java")
+                            && !x.getTitle().toLowerCase().contains("javascript"))
+                    .filter(x -> {
+                        boolean rsl = true;
+                        for (Post p : postStoreSql) {
+                            if (p.getLink().equals(x.getLink())) {
+                                rsl = false;
+                                break;
                             }
-                            return rsl;
-                        })
-                        .forEach(store::save);
+                        }
+                        return rsl;
+                    })
+                    .forEach(store::save);
         }
+    }
 
         public static void main(String[] args) throws IOException, SchedulerException {
             Grabber grab = new Grabber();
@@ -90,11 +91,10 @@ public class Grabber implements Grab {
             grab.init(new SqlRuParse(dateTimeParser), store, scheduler);
             grab.web(store);
         }
-    }
 
     private void web(Store store) {
         new Thread(() -> {
-            try (ServerSocket server = new ServerSocket(Integer.parseInt(cfg.getProperty("port")))) {
+            try (ServerSocket server = new ServerSocket(Integer.parseInt(CFG.getProperty("port")))) {
                 while (!server.isClosed()) {
                     Socket socket = server.accept();
                     try (OutputStream out = socket.getOutputStream()) {

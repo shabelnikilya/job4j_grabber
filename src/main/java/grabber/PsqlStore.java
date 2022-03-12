@@ -28,27 +28,6 @@ public class PsqlStore implements Store, AutoCloseable {
         }
     }
 
-    public static void main(String[] args) {
-        try (InputStream in = SqlRuParse
-                .class.getClassLoader()
-                .getResourceAsStream("app.properties")) {
-            Properties cc = new Properties();
-            cc.load(in);
-            DateTimeParser dateTimeParser = new SqlRuDateTimeParser();
-            Parse parse = new SqlRuParse(dateTimeParser);
-            Store sqlStore = new PsqlStore(cc);
-            Post pOne = parse.detail("https://www.sql.ru/forum/1339936/razrabotchik-flutter-100-200k-udalenno");
-            Post pSecond = parse.detail("https://www.sql.ru/forum/1339873/swift-middle-developer");
-            sqlStore.save(pOne);
-            sqlStore.save(pSecond);
-            List<Post> rsl = sqlStore.getAll();
-            System.out.println(rsl);
-            System.out.println(sqlStore.findById(2));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public void save(Post post) {
         try (var statement = cnn.prepareStatement(
